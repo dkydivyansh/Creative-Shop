@@ -1,0 +1,181 @@
+/* Container for the entire orders page */
+.orders-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 8rem 2rem 4rem;
+}
+
+.orders-title {
+    font-family: "Workbench", sans-serif;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    color: #ffffff;
+}
+
+/* Card for when there are no orders */
+.no-orders-card {
+    background: #000000;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 3rem;
+    text-align: center;
+}
+.no-orders-card p {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    color: #cccccc;
+}
+
+/* List container for all order cards */
+.orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Individual order card styling */
+.order-card {
+    background: #000000;
+    border: 1px solid #333;
+    border-radius: 8px;
+    overflow: hidden;
+    color: #ffffff;
+}
+
+.order-header {
+    background: #111111;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #aaaaaa;
+    font-size: 0.85rem;
+}
+
+.header-left, .header-right {
+    display: flex;
+    gap: 2rem;
+}
+
+.header-info {
+    display: flex;
+    flex-direction: column;
+}
+.info-label {
+    text-transform: uppercase;
+    font-size: 0.75rem;
+}
+.info-value {
+    color: #fff;
+    font-weight: 600;
+}
+.order-id {
+    text-align: right;
+}
+.order-id .info-value {
+    font-family: monospace;
+}
+
+.order-body {
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start; /* Align items to the top */
+    gap: 1.5rem;
+}
+
+.order-details-left {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.order-details-right {
+    margin-left: auto; /* Pushes this column to the far right */
+}
+
+
+/* Status badge styling - Black & White Theme */
+.status {
+    padding: 0.4rem 0.8rem;
+    border-radius: 16px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: 1px solid #ffffff;
+    background: #000000;
+    color: #ffffff;
+}
+.status-pending_payment, .status-cancelled {
+    background: #dddddd;
+    color: #000000;
+    border-color: #dddddd;
+}
+
+.status-note {
+    font-size: 0.85rem;
+    color: #888;
+    max-width: 250px;
+}
+
+/* Action buttons */
+.btn-order-action {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: #ffffff;
+    color: #000000;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 600;
+    border: 1px solid #ffffff;
+    transition: all 0.2s;
+}
+.btn-order-action:hover {
+    background-color: #000000;
+    color: #ffffff;
+}
+
+/* Preview of items in the order */
+.order-items-preview {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    justify-content: flex-end; /* Align content to the right */
+}
+.item-thumbnail {
+    width: 60px;
+    height: 60px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 1px solid #333;
+}
+.item-summary {
+    text-align: right;
+}
+.item-summary .item-name {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+.item-summary .other-items {
+    font-size: 0.9rem;
+    color: #888;
+}
+
+@media (max-width: 600px) {
+    .order-header, .order-body {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    .header-right, .order-details-right {
+        margin-left: 0;
+        width: 100%;
+    }
+    .order-id, .item-summary {
+        text-align: left;
+    }
+    .order-items-preview {
+        justify-content: flex-start;
+    }
+}
+

@@ -1,0 +1,147 @@
+/* General container for payment and expired pages */
+.payment-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8rem 2rem 4rem;
+    background-color: #0a0a0a; /* Match profile background */
+    min-height: 80vh;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Card styling for both pages */
+.payment-card {
+    background: #111111;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 480px;
+    text-align: center;
+    color: #ffffff;
+}
+
+.payment-title {
+    font-family: "Workbench", sans-serif;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.order-id {
+    font-size: 0.9rem;
+    color: #888888;
+    margin-bottom: 2rem;
+}
+
+.order-total {
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.order-total span {
+    font-size: 1rem;
+    color: #aaa;
+}
+
+.order-total .total-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.payment-instructions {
+    font-size: 0.9rem;
+    color: #888;
+    margin-bottom: 2rem;
+}
+
+#google-pay-button-container {
+    display: flex;
+    justify-content: center;
+    min-height: 44px; /* Google Pay button height */
+}
+
+.payment-timer {
+    margin-top: 2rem;
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.payment-timer #timer {
+    font-weight: 600;
+    color: #dc3545;
+}
+
+/* Expired Page Specific Styles */
+.expired-card h1 {
+    font-size: 2rem;
+    color: #dc3545;
+    margin-bottom: 1rem;
+}
+
+.expired-card p {
+    font-size: 1rem;
+    color: #aaa;
+    margin-bottom: 2rem;
+}
+
+.btn-return {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: #fff;
+    color: #0a0a0a;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.btn-return:hover {
+    background-color: #ddd;
+}
+
+
+.razorpay-secure-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 28px;
+    font-size: 18px;
+    font-weight: 600;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    color: #000000;
+    background-color: #ffffff;
+    border: 2px solid #000000;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    width: 100%;
+    margin-top: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.razorpay-secure-button:hover {
+    background-color: #f2f2f2;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+}
+
+.razorpay-secure-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+
+.razorpay-secure-button .secure-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+    stroke-width: 2.5;
+}
+

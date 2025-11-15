@@ -1,0 +1,96 @@
+/* General container for success, failure, and other status pages */
+.status-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8rem 2rem 4rem;
+    background-color: #0a0a0a;
+    min-height: 80vh;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* The main card for content */
+.status-card {
+    background: #111111;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    color: #ffffff;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Icon styling */
+.status-icon {
+    font-size: 4rem;
+    line-height: 1;
+    margin-bottom: 1.5rem;
+}
+
+.status-icon.success {
+    color: #28a745;
+}
+
+.status-icon.failure {
+    color: #dc3545;
+}
+
+/* Title and message styling */
+.status-title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.status-message {
+    font-size: 1rem;
+    color: #a3a3a3;
+    line-height: 1.6;
+    margin-bottom: 2.5rem;
+}
+
+.status-message strong {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* Action button styling */
+.status-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.btn {
+    display: inline-block;
+    width: 100%;
+    padding: 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: #ffffff;
+    color: #0a0a0a;
+}
+.btn-primary:hover {
+    background: #d9d9d9;
+}
+
+.btn-secondary {
+    background: transparent;
+    color: #a3a3a3;
+    border: 1px solid #333;
+}
+.btn-secondary:hover {
+    background: #1a1a1a;
+    color: #ffffff;
+    border-color: #444;
+}

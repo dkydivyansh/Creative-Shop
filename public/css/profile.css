@@ -1,0 +1,207 @@
+/* --- Loader Styles --- */
+.loader {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
+/* --- Existing Styles --- */
+.profile-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 8rem 2rem 4rem;
+}
+
+.profile-title {
+    font-family: "Workbench", sans-serif;
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.profile-card {
+    background: #111111;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.profile-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.profile-section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.edit-btn {
+    background: #333;
+    color: #fff;
+    border: 1px solid #555;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.edit-btn:hover {
+    background: #444;
+}
+
+.profile-details .detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.profile-details .detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-weight: 500;
+    color: #888888;
+}
+
+.detail-value {
+    color: #ffffff;
+}
+
+.email-note {
+    font-size: 0.8rem;
+    color: #666666;
+    text-align: left;
+    margin-top: -0.5rem;
+    padding-bottom: 1rem;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.7);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background-color: #1a1a1a;
+    margin: 10% auto;
+    padding: 2rem;
+    border: 1px solid #333;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 12px;
+    position: relative;
+}
+
+.close-btn {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #aaa;
+}
+
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    background: #222;
+    border: 1px solid #444;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 1rem;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn-cancel, .btn-save {
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+}
+
+.btn-cancel {
+    background: #333;
+    color: #fff;
+}
+
+.btn-save {
+    background: #fff;
+    color: #0a0a0a;
+}
+
+/* Notification Styles */
+#notification-area {
+    position: fixed;
+    top: 90px;
+    right: 20px;
+    z-index: 1002;
+}
+
+.notification {
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 500;
+    min-width: 250px;
+}
+
+.notification.success {
+    background-color: #28a745;
+}
+
+.notification.error {
+    background-color: #dc3545;
+}

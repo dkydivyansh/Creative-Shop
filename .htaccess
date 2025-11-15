@@ -1,0 +1,24 @@
+# Turn on the rewrite engine
+RewriteEngine On
+
+# Set the base directory to be the root
+RewriteBase /
+
+# Redirect all requests that are not an existing file or directory to index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?_url=/$1 [L,QSA]
+
+# .htaccess - Force No Cache
+<IfModule mod_headers.c>
+    # Disable caching completely
+    Header always set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    Header always set Pragma "no-cache"
+    Header always set Expires "0"
+</IfModule>
+
+# Extra hardening for proxies
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 0 seconds"
+</IfModule>

@@ -1,0 +1,99 @@
+/*
+ * Stylesheet specifically for the Category Page.
+ */
+
+/* FIX: This prevents the page content from being hidden by the fixed navbar. */
+body {
+    padding-top: 80px; 
+}
+
+.category-header {
+            max-width: 2400px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+            text-align: left;
+        }
+
+        .category-title {
+            font-family: "Roboto Flex", sans-serif;
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 400;
+            color: #ffffff;
+            margin-bottom: 1rem;
+        }
+        
+        .category-title span {
+            display: inline-block;
+            white-space: pre;
+            transition: font-variation-settings 0.1s ease-out;
+        }
+
+        .category-description {
+            font-family: "Roboto Flex", sans-serif;
+            font-size: 1.125rem;
+            color: #f0f0f0;
+            max-width: 800px;
+            margin-bottom: 3rem;
+            line-height: 1.7;
+        }
+
+        .category-description span {
+             display: inline-block;
+            white-space: pre;
+            transition: font-variation-settings 0.1s ease-out;
+        }
+
+/* Filter and Products */
+.filter-section2 {
+    display: flex;
+    justify-content: center;
+    padding: 0rem 2rem 2rem;
+}
+
+.filter-tabs2 {
+    display: flex;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 0.25rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.filter-tab2 {
+    padding: 0.75rem 2rem;
+    background: transparent;
+    color: #888888;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+}
+
+.filter-tab2.active { background: #ffffff; color: #0a0a0a; }
+.filter-tab2:hover:not(.active) { color: #ffffff; background: rgba(255, 255, 255, 0.1); }
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
+    .category-header, .filter-section {
+        padding-left: 2.5rem;
+        padding-right: 2.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+     .category-header, .filter-section {
+        padding-left: 4rem;
+        padding-right: 4rem;
+    }
+}
+
+@media (max-width: 767px) {
+    .filter-section { padding: 0 1.5rem 4rem; }
+    .category-header { padding: 2rem 1.5rem; }
+    .category-title { font-size: 2rem; }
+    .category-description { font-size: 1rem; }
+}
