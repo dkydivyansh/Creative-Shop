@@ -160,6 +160,19 @@ CREATE TABLE `user_cart` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `sessions` (database-backed PHP sessions for multi-server)
+--
+CREATE TABLE `sessions` (
+  `id` varchar(128) NOT NULL,
+  `data` mediumtext NOT NULL,
+  `expires_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_sessions_expires` (`expires_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 
 --
 -- ADDING INDEXES AND FOREIGN KEYS

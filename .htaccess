@@ -15,8 +15,12 @@ RewriteRule ^(.*)$ index.php?_url=/$1 [L,QSA]
     Header always set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
     Header always set Pragma "no-cache"
     Header always set Expires "0"
+    Header always unset X-Powered-By
+    Header unset X-Powered-By
+    Header always unset platform
+    Header always unset panel
+    Header always unset x-turbo-charged-by
 </IfModule>
-
 # Extra hardening for proxies
 <IfModule mod_expires.c>
     ExpiresActive On

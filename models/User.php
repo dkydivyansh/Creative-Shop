@@ -1,10 +1,14 @@
 <?php
-register_shutdown_function(function() { global $pdo; $pdo = null; });
+register_shutdown_function(function () {
+    global $pdo;
+    $pdo = null; });
 require_once __DIR__ . '/../includes/usernotifications.php';
-class User {
+class User
+{
     private $pdo;
 
-    public function __construct(PDO $pdo) {
+    public function __construct(PDO $pdo)
+    {
         $this->pdo = $pdo;
     }
 
@@ -14,7 +18,8 @@ class User {
      * @param string $authUserId The user's ID from the auth server.
      * @return mixed The user record if found, otherwise false.
      */
-    public function findByAuthId($authUserId) {
+    public function findByAuthId($authUserId)
+    {
         try {
             $stmt = $this->pdo->prepare("SELECT * FROM users WHERE auth_user_id = :auth_user_id");
             $stmt->execute(['auth_user_id' => $authUserId]);
@@ -24,7 +29,8 @@ class User {
             return false;
         }
     }
-    public function getUserNameByAuthId($authUserId) {
+    public function getUserNameByAuthId($authUserId)
+    {
         try {
             $stmt = $this->pdo->prepare("SELECT name FROM users WHERE auth_user_id = :auth_user_id");
             $stmt->execute(['auth_user_id' => $authUserId]);
@@ -42,7 +48,8 @@ class User {
      * @param array $userData An associative array of user data.
      * @return bool True on success, false on failure.
      */
-    public function createUser(array $userData) {
+    public function createUser(array $userData)
+    {
         try {
             $sql = "INSERT INTO users (auth_user_id, email, name, phone_number, last_login) 
                     VALUES (:auth_user_id, :email, :name, :phone_number, NOW())";
@@ -65,7 +72,8 @@ class User {
      * @param string $authUserId The user's external auth ID.
      * @return bool True on success, false on failure.
      */
-    public function updateLastLogin($authUserId) {
+    public function updateLastLogin($authUserId)
+    {
         try {
             $stmt = $this->pdo->prepare("UPDATE users SET last_login = NOW() WHERE auth_user_id = :auth_user_id");
             return $stmt->execute([':auth_user_id' => $authUserId]);
@@ -84,7 +92,8 @@ class User {
      * @param string $state The user's state/region.
      * @return bool True on success, false on failure.
      */
-    public function updateUserLocation($authUserId, $country, $city, $state) {
+    public function updateUserLocation($authUserId, $country, $city, $state)
+    {
         try {
             // The SQL query now includes the 'state' field
             $stmt = $this->pdo->prepare("UPDATE users SET country = :country, city = :city, state = :state WHERE auth_user_id = :auth_user_id");
@@ -99,11 +108,13 @@ class User {
             return false;
         }
     }
-    public function updateUserProfile($authUserId, $name, $phoneNumber, $email = null) {
+    public function updateUserProfile($authUserId, $name, $phoneNumber, $email = null)
+    {
         try {
             // Get the user's current data before updating
             $currentUser = $this->findByAuthId($authUserId);
-            if (!$currentUser) return false;
+            if (!$currentUser)
+                return false;
 
             $sql = "UPDATE users SET name = :name, phone_number = :phone_number";
             $params = [
@@ -118,7 +129,7 @@ class User {
             }
 
             $sql .= " WHERE auth_user_id = :auth_user_id";
-            
+
             $stmt = $this->pdo->prepare($sql);
             $success = $stmt->execute($params);
 
@@ -139,7 +150,8 @@ class User {
         }
     }
 
-    public function updateUserAddress($authUserId, array $addressData) {
+    public function updateUserAddress($authUserId, array $addressData)
+    {
         try {
             $sql = "UPDATE users SET 
                         address1 = :address1, 

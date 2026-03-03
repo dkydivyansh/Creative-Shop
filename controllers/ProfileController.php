@@ -1,16 +1,21 @@
 <?php
-register_shutdown_function(function() { global $pdo; $pdo = null; });
+register_shutdown_function(function () {
+    global $pdo;
+    $pdo = null; });
 require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../models/Category.php';
-class ProfileController {
+class ProfileController
+{
     private $countryTaxRates;
 
-    public function __construct($taxRates = []) {
+    public function __construct($taxRates = [])
+    {
         $this->countryTaxRates = $taxRates;
     }
 
-    public function profile() {
+    public function profile()
+    {
         require_login();
 
         $pdo = DBConnection::get();
@@ -18,7 +23,7 @@ class ProfileController {
         $user = $userModel->findByAuthId($_SESSION['user_id']);
         $categoryModel = new Category($pdo);
         $categories = $categoryModel->getAllCategories();
-        
+
 
         if (!$user) {
             echo "Error: Could not find user profile.";
@@ -37,14 +42,15 @@ class ProfileController {
         require __DIR__ . '/../views/layouts/footer.php';
     }
 
-    public function updateProfile() {
+    public function updateProfile()
+    {
         // 1. Validate session first (important)
         if (!validate_session()) {
             header('Content-Type: application/json');
             echo json_encode(['success' => false, 'message' => 'Your session has expired. Please log in again.']);
             return;
         }
-        
+
         header('Content-Type: application/json');
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -59,7 +65,7 @@ class ProfileController {
             echo json_encode(['success' => false, 'message' => 'Name and phone number are required.']);
             return;
         }
-        
+
         if (!preg_match("/^[a-zA-Z\s]+$/", $name)) {
             echo json_encode(['success' => false, 'message' => 'Name can only contain letters and spaces.']);
             return;
@@ -70,7 +76,7 @@ class ProfileController {
             return;
         }
 
-    
+
 
         $pdo = DBConnection::get();
         $userModel = new User($pdo);
@@ -80,7 +86,7 @@ class ProfileController {
         $profileDataChanged = ($localUser['name'] !== $name || $localUser['phone_number'] !== $phone);
 
         // 3. Sync and check for email changes
-        $profileResponse = auth_server_profile($_SESSION['user_id'], $_SESSION['session_token']);
+        $profileResponse = sso_get_userinfo($_SESSION['access_token']);
         if (!$profileResponse['success']) {
             echo json_encode(['success' => false, 'message' => 'Could not verify your session. Please log in again.']);
             return;
@@ -112,13 +118,14 @@ class ProfileController {
         }
     }
 
-    public function updateAddress() {
+    public function updateAddress()
+    {
         if (!validate_session()) {
             header('Content-Type: application/json');
             echo json_encode(['success' => false, 'message' => 'Your session has expired. Please log in again.']);
             return;
         }
-        
+
         header('Content-Type: application/json');
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -153,7 +160,7 @@ class ProfileController {
             'country' => $_POST['country'],
             'pincode' => $_POST['pincode'],
         ];
-        
+
         $addressChanged = false;
         foreach ($addressData as $key => $value) {
             if ($localUser[$key] != $value) { // Use != to handle null vs empty string

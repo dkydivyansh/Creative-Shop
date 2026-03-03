@@ -3,13 +3,15 @@ class AuthController
 {
     public function __construct()
     {
-        // FIX: Start the session if it's not already started.
-        // This is crucial for reading the error message from the callback.
-        register_shutdown_function(function() { $pdo = DBConnection::get(); $pdo = null; });
+        register_shutdown_function(function () {
+            $pdo = DBConnection::get();
+            $pdo = null;
+        });
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
     }
+
     /**
      * Displays the login form.
      */
@@ -28,7 +30,7 @@ class AuthController
 
     /**
      * Displays the authentication form without the main site layout.
-     * This is a private helper method.
+     * Generates a CSRF `state` token and passes SSO config to the React app.
      *
      * @param string $formType Can be 'login' or 'register'.
      */
@@ -38,10 +40,16 @@ class AuthController
         // Add the specific CSS for the auth page
         $extra_styles = ['/public/css/auth.css'];
 
-        // Get the Auth Client ID from the config file
-        $authClientId = defined('AUTH_CLIENT_ID') ? AUTH_CLIENT_ID : '';
+        // Generate a random state parameter for CSRF protection
+        $oauthState = bin2hex(random_bytes(16));
+        $_SESSION['oauth_state'] = $oauthState;
 
-?>
+        // Get SSO config from constants
+        $ssoClientId = defined('SSO_CLIENT_ID') ? SSO_CLIENT_ID : '';
+        $ssoScope = defined('SSO_SCOPE') ? SSO_SCOPE : 'basic';
+        $ssoBaseUrl = defined('SSO_BASE_URL') ? SSO_BASE_URL : '';
+
+        ?>
         <!DOCTYPE html>
         <html lang="en">
 
@@ -72,7 +80,8 @@ class AuthController
             <link rel="preconnect" href="https://fonts.googleapis.com">
             <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
             <link href="https://fonts.googleapis.com/css2?family=Workbench&display=swap" rel="stylesheet">
-            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+            <link rel="stylesheet"
+                href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
             <!-- Custom styles for this page -->
             <style>
                 .auth-button {
@@ -123,11 +132,11 @@ class AuthController
                     mixBlendMode = "lighten",
                 }) => {
                     const containerRef = useRef(null);
-                    
+
                     useEffect(() => {
                         const container = containerRef.current;
                         if (!container || !window.ogl) return;
-                        
+
                         const { Renderer, Program, Mesh, Triangle } = window.ogl;
                         const MAX_COLORS = 8;
                         const hexToRGB = (hex) => {
@@ -187,7 +196,7 @@ class AuthController
                         const program = new Program(gl, { vertex, fragment, uniforms });
                         const geometry = new Triangle(gl);
                         const mesh = new Mesh(gl, { geometry, program });
-                        
+
                         let raf;
                         const mouseTarget = [0, 0];
                         let lastTime = 0;
@@ -213,7 +222,7 @@ class AuthController
                                 mouseTarget[1] = cy;
                             }
                         };
-                        
+
                         const ro = new ResizeObserver(resize);
                         ro.observe(container);
 
@@ -262,26 +271,30 @@ class AuthController
 
                 function App() {
                     const formType = '<?php echo $formType; ?>';
-                    const clientId = '<?php echo $authClientId; ?>';
+                    const ssoBaseUrl = '<?php echo $ssoBaseUrl; ?>';
+                    const clientId = '<?php echo $ssoClientId; ?>';
+                    const scope = '<?php echo $ssoScope; ?>';
+                    const state = '<?php echo $oauthState; ?>';
 
+                    // Build the SSO authorize URL
+                    const authorizeUrl = `${ssoBaseUrl}/api/authorize?client_id=${clientId}&scope=${scope}&state=${state}`;
 
                     const handleLogin = () => {
-        if (clientId) {
-            // Redirect the current page to the login URL
-            window.location.href = `https://auth.dkydivyansh.com/auth/login?appauth=${clientId}`;
-        } else {
-            alert('Auth client ID is not configured.');
-        }
-    };
+                        if (clientId) {
+                            window.location.href = authorizeUrl;
+                        } else {
+                            alert('SSO client ID is not configured.');
+                        }
+                    };
 
-    const handleRegister = () => {
-        if (clientId) {
-            // Redirect the current page to the register URL
-            window.location.href = `https://auth.dkydivyansh.com/auth/register?appauth=${clientId}`;
-        } else {
-            alert('Auth client ID is not configured.');
-        }
-    };
+                    const handleRegister = () => {
+                        if (clientId) {
+                            // Same authorize URL — the SSO handles login/register choice
+                            window.location.href = authorizeUrl;
+                        } else {
+                            alert('SSO client ID is not configured.');
+                        }
+                    };
 
                     return (
                         <React.Fragment>
@@ -302,29 +315,29 @@ class AuthController
                                 />
                             </div>
                             <header className="page-header">
-                                <a href="/" className="logo">SHOP - dkydivyansh</a>
+                                <a href="/" className="logo" style={{ fontFamily: 'Workbench, sans-serif' }}>SHOP - dkydivyansh</a>
                             </header>
 
                             <div className="auth-container">
                                 {formType === 'login' ? (
                                     <div className="auth-card">
-                                        <img src="https://dkydivyansh.com/wp-content/uploads/2025/08/D-2.png" alt="icon" className="auth-card-icon" onError={(e) => e.target.style.display='none'}/>
+                                        <img src="https://sso.dkydivyansh.com/favicon.ico" alt="icon" className="auth-card-icon" onError={(e) => e.target.style.display = 'none'} />
                                         <h2>Login</h2>
                                         <?php
                                         // Check for an error message from the callback
                                         if (isset($_SESSION['auth_error'])):
-                                        ?>
-        <div class="auth-error-box">
-            <?php
-                                            echo htmlspecialchars($_SESSION['auth_error']);
-                                            // Clear the error from the session so it doesn't show again
-                                            unset($_SESSION['auth_error']);
-            ?>
-        </div>
-    <?php endif; ?>
+                                            ?>
+                                            <div class="auth-error-box">
+                                                <?php
+                                                echo htmlspecialchars($_SESSION['auth_error']);
+                                                // Clear the error from the session so it doesn't show again
+                                                unset($_SESSION['auth_error']);
+                                                ?>
+                                            </div>
+                                        <?php endif; ?>
                                         <p>Welcome back! Sign in to access your account, view your orders, and manage your profile.</p>
                                         <button onClick={handleLogin} className="auth-button">
-                                            <span>Login with dkydivyansh.com</span>
+                                            <span>Login with <span style={{ fontFamily: 'Workbench, sans-serif' }}>Dkydivyansh.com SSO</span></span>
                                             <span className="material-symbols-outlined arrow">arrow_forward</span>
                                         </button>
                                         <p className="auth-switch-link">
@@ -333,11 +346,11 @@ class AuthController
                                     </div>
                                 ) : (
                                     <div className="auth-card">
-                                        <img src="https://dkydivyansh.com/wp-content/uploads/2025/08/D-2.png" alt="icon" className="auth-card-icon" onError={(e) => e.target.style.display='none'}/>
+                                        <img src="https://sso.dkydivyansh.com/favicon.ico" alt="icon" className="auth-card-icon" onError={(e) => e.target.style.display = 'none'} />
                                         <h2>Register</h2>
                                         <p>New here? Create an account to start shopping, save your favorite items, and enjoy a seamless checkout experience.</p>
                                         <button onClick={handleRegister} className="auth-button">
-                                            <span>Register with dkydivyansh.com</span>
+                                            <span>Register with <span style={{ fontFamily: 'Workbench, sans-serif' }}>Dkydivyansh.com SSO</span></span>
                                             <span className="material-symbols-outlined arrow">arrow_forward</span>
                                         </button>
                                         <p className="auth-switch-link">
@@ -355,6 +368,6 @@ class AuthController
         </body>
 
         </html>
-<?php
+        <?php
     }
 }

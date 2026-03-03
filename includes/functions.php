@@ -1,341 +1,108 @@
 <?php
-// user_helper_functions.php
+// sso_helper_functions.php
+// Functions for interacting with the Dkydivyansh.com SSO API (OAuth2)
 
-function auth_toke_exchage($token) {   
-    $base_url = rtrim(AUTH_SERVER_URL, '/') . '/api/v1/';
-    $url = $base_url . '?type=exchange_token';
-    
+/**
+ * Exchanges a short-lived authorization code for a long-lived access token.
+ * POST /api/token
+ *
+ * @param string $code The authorization code received from the SSO callback.
+ * @return array ['success' => bool, 'data' => [...] | 'message' => string]
+ *               On success, data contains: user_id, access_token, scope, expires_in
+ */
+function sso_exchange_code($code)
+{
+    $url = rtrim(SSO_BASE_URL, '/') . '/api/token';
+
     $payload = json_encode([
-        'token' => $token,
-        'client_id' => AUTH_CLIENT_ID,
-        'client_secret' => AUTH_CLIENT_SECRET
+        'client_id' => SSO_CLIENT_ID,
+        'client_secret' => SSO_CLIENT_SECRET,
+        'code' => $code
     ]);
-    
+
     $headers = [
         'Content-Type: application/json',
-        'User-Agent: ' . AUTH_USER_AGENT,
         'Accept: application/json'
     ];
+
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-    
+
     $result = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
-    
+
     if (!$result) {
-        return ['success' => false, 'message' => 'Could not connect to the authentication server.'];
+        return ['success' => false, 'message' => 'Could not connect to the SSO server.'];
     }
-    
+
     $data = json_decode($result, true);
 
-    // FIX: Return the specific error message from the auth server
     if (!isset($data['success']) || !$data['success']) {
-        $errorMessage = $data['message'] ?? 'An unknown authentication error occurred.';
-        return ['success' => false, 'message' => $errorMessage];
+        $errorDesc = $data['error_description'] ?? $data['error'] ?? 'An unknown SSO error occurred.';
+        return ['success' => false, 'message' => $errorDesc];
     }
-    
-    return ['success' => true, 'data' => $data['data']];
+
+    // Success response: { success, user_id, access_token, scope, expires_in }
+    return [
+        'success' => true,
+        'data' => [
+            'user_id' => $data['user_id'],
+            'access_token' => $data['access_token'],
+            'scope' => $data['scope'],
+            'expires_in' => $data['expires_in']
+        ]
+    ];
 }
 
-function auth_server_logout($user_id, $session_token) {
-    // Construct URL as per API documentation
-    $base_url = rtrim(AUTH_SERVER_URL, '/') . '/api/v1/';
-    $url = $base_url . '?type=logout';
-    
-    // Construct payload as per API documentation
+/**
+ * Retrieves the profile data of the authenticated user.
+ * POST /api/userinfo
+ *
+ * @param string $accessToken The access token obtained from token exchange.
+ * @return array ['success' => bool, 'data' => ['user' => [...]] | 'message' => string]
+ */
+function sso_get_userinfo($accessToken)
+{
+    $url = rtrim(SSO_BASE_URL, '/') . '/api/userinfo';
+
     $payload = json_encode([
-        'client_id' => AUTH_CLIENT_ID,
-        'client_secret' => AUTH_CLIENT_SECRET
-    ], JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION);
-    
+        'client_id' => SSO_CLIENT_ID,
+        'client_secret' => SSO_CLIENT_SECRET,
+        'access_token' => $accessToken
+    ]);
+
     $headers = [
         'Content-Type: application/json',
-        'User-Agent: ' . AUTH_USER_AGENT,
-        'Accept: application/json',
-        'Authorization: Bearer ' . $session_token,
-        'X-User-ID: ' . $user_id
+        'Accept: application/json'
     ];
-    
+
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-    
-    $result = curl_exec($ch);
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-    
-    
-    if (!$result) {
-        return [
-            'success' => false,
-            'error_code' => 'SERVER_ERROR',
-            'message' => 'An error occurred on the server. Please try again later.'
-        ];
-    }
-    
-    $data = json_decode($result, true);
-      if (!isset($data['success']) || !$data['success']) {
-        // Handle specific error cases
-        if (isset($data['error_code'])) {
-            if ($data['error_code'] === 'INVALID_TOKEN') {
-                return [
-                    'success' => false,
-                    'error_code' => 'INVALID_TOKEN',
-                    'message' => 'Invalid or expired session token'
-                ];
-            }
-            // Check for account deactivation message
-            if (isset($data['message']) && $data['message'] === 'ACCOUNT_DEACTIVE') {
-                return [
-                    'success' => false,
-                    'error_code' => 'ACCOUNT_DEACTIVE',
-                    'message' => 'Your account has been deactivated by auth server. Please contact support.'
-                ];
-            }
-        }
-        
-        // Log unknown errors and return generic error
-        error_log("Auth server unknown logout error: HTTP $http_code - Response: $result");
-        return [
-            'success' => false,
-            'error_code' => 'SERVER_ERROR',
-            'message' => 'An error occurred on the server. Please try again later.'
-        ];
-    }
-    
-    return ['success' => true];
-}
 
-function auth_server_refresh($user_id, $session_token, $refresh_token) {
-    // Construct URL as per API documentation
-    $base_url = rtrim(AUTH_SERVER_URL, '/') . '/api/v1/';
-    $url = $base_url . '?type=refresh';
-    
-    // Construct payload as per API documentation
-    $payload = json_encode([
-        'refresh_token' => $refresh_token,
-        'old_session_token' => $session_token,
-        'client_id' => AUTH_CLIENT_ID,
-        'client_secret' => AUTH_CLIENT_SECRET
-    ], JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION);
-    
-    $headers = [
-        'Content-Type: application/json',
-        'User-Agent: ' . AUTH_USER_AGENT,
-        'Accept: application/json',
-        'Authorization: Bearer ' . $session_token,
-        'X-User-ID: ' . $user_id
-    ];
-    
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-    
     $result = curl_exec($ch);
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
-    
-    if (!$result) {
-        return [
-            'success' => false,
-            'error_code' => 'SERVER_ERROR',
-            'message' => 'An error occurred on the server. Please try again later.'
-        ];
-    }
-    
-    $data = json_decode($result, true);
-      if (!isset($data['success']) || !$data['success']) {
-        // Handle specific error cases
-        if (isset($data['error_code'])) {
-            if ($data['error_code'] === 'INVALID_TOKEN') {
-                return [
-                    'success' => false,
-                    'error_code' => 'INVALID_TOKEN',
-                    'message' => 'Invalid or expired refresh token'
-                ];
-            }
-            // Check for account deactivation message
-            if (isset($data['message']) && $data['message'] === 'ACCOUNT_DEACTIVE') {
-                return [
-                    'success' => false,
-                    'error_code' => 'ACCOUNT_DEACTIVE',
-                    'message' => 'Your account has been deactivated by auth server. Please contact support.'
-                ];
-            }
-        }
-        
-        // Log unknown errors and return generic error
-        error_log("Auth server unknown refresh error: HTTP $http_code - Response: $result");
-        return [
-            'success' => false,
-            'error_code' => 'SERVER_ERROR',
-            'message' => 'An error occurred on the server. Please try again later.'
-        ];
-    }
-    
-    return ['success' => true, 'data' => $data['data']];
-}
 
-function auth_server_validate($user_id, $session_token) {
-    // Construct URL as per API documentation
-    $base_url = rtrim(AUTH_SERVER_URL, '/') . '/api/v1/';
-    $url = $base_url . '?type=validate';
-    
-    // Construct payload as per API documentation
-    $payload = json_encode([
-        'client_id' => AUTH_CLIENT_ID,
-        'client_secret' => AUTH_CLIENT_SECRET
-    ], JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION);
-    
-    $headers = [
-        'Content-Type: application/json',
-        'User-Agent: ' . AUTH_USER_AGENT,
-        'Accept: application/json',
-        'Authorization: Bearer ' . $session_token,
-        'X-User-ID: ' . $user_id
-    ];
-    
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-    
-    $result = curl_exec($ch);
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-    
-   
     if (!$result) {
-        return [
-            'success' => false,
-            'error_code' => 'SERVER_ERROR',
-            'message' => 'An error occurred on the server. Please try again later.'
-        ];
+        return ['success' => false, 'message' => 'Could not connect to the SSO server.'];
     }
-    
-    $data = json_decode($result, true);
-      if (!isset($data['success']) || !$data['success']) {
-        // Handle specific error cases
-        if (isset($data['error_code'])) {
-            if ($data['error_code'] === 'INVALID_TOKEN') {
-                return [
-                    'success' => false,
-                    'error_code' => 'INVALID_TOKEN',
-                    'message' => 'Invalid or expired session token'
-                ];
-            }
-            // Check for account deactivation message
-            if (isset($data['message']) && $data['message'] === 'ACCOUNT_DEACTIVE') {
-                return [
-                    'success' => false,
-                    'error_code' => 'ACCOUNT_DEACTIVE',
-                    'message' => 'Your account has been deactivated by auth server. Please contact support.'
-                ];
-            }
-        }
-        
-        // Log unknown errors and return generic error
-        error_log("Auth server unknown validate error: HTTP $http_code - Response: $result");
-        return [
-            'success' => false,
-            'error_code' => 'SERVER_ERROR',
-            'message' => 'An error occurred on the server. Please try again later.'
-        ];
-    }
-    
-    return ['success' => true, 'data' => $data['data']];
-}
 
-
-function auth_server_profile($user_id, $session_token) {
-    // Construct URL as per API documentation
-    $base_url = rtrim(AUTH_SERVER_URL, '/') . '/api/v1/';
-    $url = $base_url . '?type=profile';
-    
-    // Construct payload as per API documentation
-    $payload = json_encode([
-        'client_id' => AUTH_CLIENT_ID,
-        'client_secret' => AUTH_CLIENT_SECRET
-    ], JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION);
-    
-    $headers = [
-        'Content-Type: application/json',
-        'User-Agent: ' . AUTH_USER_AGENT,
-        'Accept: application/json',
-        'Authorization: Bearer ' . $session_token,
-        'X-User-ID: ' . $user_id
-    ];
-    
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-    
-    $result = curl_exec($ch);
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-    
-    
-    if (!$result) {
-        return [
-            'success' => false,
-            'error_code' => 'SERVER_ERROR',
-            'message' => 'An error occurred on the server. Please try again later.'
-        ];
-    }
-    
     $data = json_decode($result, true);
-    
+
     if (!isset($data['success']) || !$data['success']) {
-        // Handle specific error cases
-        if (isset($data['error_code'])) {
-            if ($data['error_code'] === 'INVALID_TOKEN') {
-                return [
-                    'success' => false,
-                    'error_code' => 'INVALID_TOKEN',
-                    'message' => 'Invalid or expired session token'
-                ];
-            }
-            // Check for account deactivation message
-            if (isset($data['message']) && $data['message'] === 'ACCOUNT_DEACTIVE') {
-                return [
-                    'success' => false,
-                    'error_code' => 'ACCOUNT_DEACTIVE',
-                    'message' => 'Your account has been deactivated by auth server. Please contact support.'
-                ];
-            }
-        }
-        
-        // Log unknown errors and return generic error
-        error_log("Auth server unknown profile error: HTTP $http_code - Response: $result");
-        return [
-            'success' => false,
-            'error_code' => 'SERVER_ERROR',
-            'message' => 'An error occurred on the server. Please try again later.'
-        ];
+        $errorDesc = $data['error_description'] ?? $data['error'] ?? 'Failed to fetch user profile.';
+        return ['success' => false, 'message' => $errorDesc];
     }
-    
-    return ['success' => true, 'data' => $data['data']];
+
+    // Success response: { success, user: { user_id, email, first_name, last_name, ... } }
+    return ['success' => true, 'data' => $data];
 }
